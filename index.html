@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Pocket Zoo Prototype</title>
+  <style>
+    :root { --panel:#ffffff; --ink:#1f2937; --muted:#6b7280; --accent:#2563eb; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:#dce7d4; color:var(--ink); overflow:hidden; }
+    #app { display:grid; grid-template-rows:auto 1fr auto; height:100vh; }
+    header { background:rgba(255,255,255,.96); padding:8px 12px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; box-shadow:0 1px 6px rgba(0,0,0,.15); z-index:2; }
+    header strong { font-size:17px; }
+    .stat { font-size:14px; }
+    #message { margin-left:auto; color:var(--muted); font-size:13px; min-width:180px; text-align:right; }
+    #canvasWrap { position:relative; overflow:auto; touch-action:none; }
+    canvas { display:block; background:#9fd27e; image-rendering:pixelated; }
+    #toolbar { background:rgba(255,255,255,.97); padding:8px; display:flex; gap:8px; align-items:center; overflow-x:auto; box-shadow:0 -1px 6px rgba(0,0,0,.15); z-index:2; }
+    button { border:1px solid #cbd5e1; background:#fff; border-radius:9px; padding:9px 12px; font-weight:650; white-space:nowrap; cursor:pointer; }
+    button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+    button:disabled { opacity:.5; cursor:not-allowed; }
+    .hint { font-size:12px; color:var(--muted); white-space:nowrap; }
+    @media (max-width:700px){
+      header { gap:9px; }
+      #message { width:100%; text-align:left; margin-left:0; }
+      button { padding:10px 12px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <strong>Pocket Zoo</strong>
+    <span class="stat">Money: <b id="money">$500</b></span>
+    <span class="stat">Guests: <b id="guests">0</b></span>
+    <span class="stat">Animals: <b id="animals">0</b></span>
+    <span class="stat">Day: <b id="day">1</b></span>
+    <span id="message">Build a fenced pen, add a gate, then place an animal inside.</span>
+  </header>
+
+  <div id="canvasWrap"><canvas id="game"></canvas></div>
+
+  <div id="toolbar">
+    <button data-tool="path">Path $5</button>
+    <button data-tool="fence">Fence $8</button>
+    <button data-tool="gate">Gate $20</button>
+    <button data-tool="animal">Zebra $80</button>
+    <button data-tool="shop">Snack stand $120</button>
+    <button data-tool="tree">Tree $15</button>
+    <button data-tool="erase">Erase</button>
+    <button id="saveBtn">Save</button>
+    <button id="resetBtn">Reset</button>
+    <span class="hint">Tap or drag on the grid. Visitors enter from the lower-left.</span>
+  </div>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const TILE = 36, COLS = 24, ROWS = 16;
+  canvas.width = COLS * TILE;
+  canvas.height = ROWS * TILE;
+
+  const COST = { path:5, fence:8, gate:20, animal:80, shop:120, tree:15 };
+  const state = {
+    money:500, day:1, tick:0, selected:'path',
+    tiles:Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({ground:'grass', object:null}))),
+    animals:[], visitors:[], incomeTimer:0
+  };
+
+  const ui = {
+    money:document.getElementById('money'), guests:document.getElementById('guests'),
+    animals:document.getElementById('animals'), day:document.getElementById('day'), message:document.getElementById('message')
+  };
+
+  // Entrance path
+  for(let x=0;x<5;x++) state.tiles[ROWS-2][x].ground='path';
+
+  function msg(t){ ui.message.textContent=t; }
+  function updateUI(){
+    ui.money.textContent='$'+Math.floor(state.money);
+    ui.guests.textContent=state.visitors.length;
+    ui.animals.textContent=state.animals.length;
+    ui.day.textContent=state.day;
+    document.querySelectorAll('[data-tool]').forEach(b=>b.classList.toggle('active', b.dataset.tool===state.selected));
+  }
+
+  function inside(x,y){ return x>=0&&y>=0&&x<COLS&&y<ROWS; }
+  function isWalkable(x,y){
+    if(!inside(x,y)) return false;
+    const t=state.tiles[y][x];
+    return (t.ground==='path'||t.object==='gate') && t.object!=='fence';
+  }
+
+  function place(tx,ty){
+    if(!inside(tx,ty)) return;
+    const t=state.tiles[ty][tx];
+    const tool=state.selected;
+    if(tool==='erase'){
+      const animalIndex=state.animals.findIndex(a=>a.x===tx&&a.y===ty);
+      if(animalIndex>=0){ state.animals.splice(animalIndex,1); msg('Animal removed.'); return; }
+      if(t.object){ t.object=null; msg('Object removed.'); }
+      else if(t.ground==='path'){ t.ground='grass'; msg('Path removed.'); }
+      return;
+    }
+    if(state.money < COST[tool]) { msg('Not enough money.'); return; }
+    if(tool==='path'){
+      if(t.object || t.ground==='path') return;
+      t.ground='path'; state.money-=COST.path;
+    } else if(tool==='fence'){
+      if(t.object || t.ground==='path') return;
+      t.object='fence'; state.money-=COST.fence;
+    } else if(tool==='gate'){
+      if(t.object || t.ground==='path') return;
+      t.object='gate'; state.money-=COST.gate;
+    } else if(tool==='shop'){
+      if(t.object || t.ground!=='path') { msg('Place shops on a path tile.'); return; }
+      t.object='shop'; state.money-=COST.shop;
+    } else if(tool==='tree'){
+      if(t.object || t.ground==='path') return;
+      t.object='tree'; state.money-=COST.tree;
+    } else if(tool==='animal'){
+      if(t.object || t.ground==='path' || state.animals.some(a=>a.x===tx&&a.y===ty)) { msg('Place animals on empty grass.'); return; }
+      state.animals.push({x:tx,y:ty,px:tx+.5,py:ty+.5,dx:0,dy:0,moveTimer:0,happy:100});
+      state.money-=COST.animal;
+      msg('Zebra added. Build a complete pen around it.');
+    }
+    updateUI();
+  }
+
+  function tileFromEvent(e){
+    const r=canvas.getBoundingClientRect();
+    const p=e.touches ? e.touches[0] : e;
+    return {x:Math.floor((p.clientX-r.left)*canvas.width/r.width/TILE), y:Math.floor((p.clientY-r.top)*canvas.height/r.height/TILE)};
+  }
+  let painting=false, last='';
+  function start(e){ painting=true; last=''; action(e); e.preventDefault(); }
+  function move(e){ if(painting){ action(e); e.preventDefault(); } }
+  function end(){ painting=false; }
+  function action(e){ const p=tileFromEvent(e), k=p.x+','+p.y; if(k!==last){ place(p.x,p.y); last=k; } }
+  canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); window.addEventListener('touchend',end);
+
+  document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>{state.selected=b.dataset.tool; updateUI();}));
+
+  function spawnVisitor(){
+    if(state.visitors.length>=40) return;
+    state.visitors.push({x:.5,y:ROWS-1.5,targetX:1,targetY:ROWS-2,wait:0,money:20+Math.random()*25});
+  }
+
+  function neighborPaths(x,y){
+    const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+    return dirs.map(([dx,dy])=>[x+dx,y+dy]).filter(([nx,ny])=>isWalkable(nx,ny));
+  }
+
+  function updateVisitors(dt){
+    if(Math.random()<0.012) spawnVisitor();
+    for(const v of state.visitors){
+      if(v.wait>0){ v.wait-=dt; continue; }
+      const tx=Math.floor(v.x), ty=Math.floor(v.y);
+      if(Math.abs(v.x-(v.targetX+.5))<.08 && Math.abs(v.y-(v.targetY+.5))<.08){
+        v.x=v.targetX+.5; v.y=v.targetY+.5;
+        const opts=neighborPaths(v.targetX,v.targetY);
+        if(opts.length){
+          const choice=opts[Math.floor(Math.random()*opts.length)]; v.targetX=choice[0]; v.targetY=choice[1];
+        } else v.wait=.7;
+        const obj=state.tiles[ty]?.[tx]?.object;
+        if(obj==='shop' && v.money>=3){ v.money-=3; state.money+=3; v.wait=.8; }
+      } else {
+        const dx=(v.targetX+.5)-v.x, dy=(v.targetY+.5)-v.y, len=Math.hypot(dx,dy)||1;
+        v.x+=dx/len*dt*1.2; v.y+=dy/len*dt*1.2;
+      }
+    }
+  }
+
+  function updateAnimals(dt){
+    for(const a of state.animals){
+      a.moveTimer-=dt;
+      if(a.moveTimer<=0){
+        const dirs=[[1,0],[-1,0],[0,1],[0,-1],[0,0]];
+        const [dx,dy]=dirs[Math.floor(Math.random()*dirs.length)];
+        const nx=Math.floor(a.px)+dx, ny=Math.floor(a.py)+dy;
+        if(inside(nx,ny) && state.tiles[ny][nx].ground==='grass' && !state.tiles[ny][nx].object){ a.dx=dx; a.dy=dy; }
+        else { a.dx=0; a.dy=0; }
+        a.moveTimer=.8+Math.random()*1.8;
+      }
+      const speed=.35;
+      a.px+=a.dx*dt*speed; a.py+=a.dy*dt*speed;
+      a.px=Math.max(.3,Math.min(COLS-.3,a.px)); a.py=Math.max(.3,Math.min(ROWS-.3,a.py));
+      a.x=Math.floor(a.px); a.y=Math.floor(a.py);
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+      const t=state.tiles[y][x], px=x*TILE, py=y*TILE;
+      ctx.fillStyle=t.ground==='path' ? '#c9b58b' : ((x+y)%2 ? '#9bd174':'#94ca6e');
+      ctx.fillRect(px,py,TILE,TILE);
+      ctx.strokeStyle='rgba(40,80,40,.13)'; ctx.strokeRect(px,py,TILE,TILE);
+      if(t.ground==='path'){
+        ctx.fillStyle='rgba(120,95,55,.18)';
+        for(let i=0;i<3;i++) ctx.fillRect(px+7+i*9,py+8+(i%2)*12,4,3);
+      }
+      if(t.object==='fence'){
+        ctx.strokeStyle='#6b4f2a'; ctx.lineWidth=4; ctx.strokeRect(px+4,py+4,TILE-8,TILE-8);
+        ctx.lineWidth=1;
+      } else if(t.object==='gate'){
+        ctx.strokeStyle='#6b4f2a'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(px+5,py+6); ctx.lineTo(px+5,py+TILE-6); ctx.moveTo(px+TILE-5,py+6); ctx.lineTo(px+TILE-5,py+TILE-6); ctx.stroke(); ctx.lineWidth=1;
+        ctx.fillStyle='#8b5a2b'; ctx.fillRect(px+11,py+15,TILE-22,5);
+      } else if(t.object==='shop'){
+        ctx.fillStyle='#ef4444'; ctx.fillRect(px+6,py+12,TILE-12,TILE-16);
+        ctx.fillStyle='#fff'; ctx.fillRect(px+10,py+17,TILE-20,8);
+        ctx.fillStyle='#fbbf24'; ctx.beginPath(); ctx.moveTo(px+4,py+12); ctx.lineTo(px+TILE/2,py+3); ctx.lineTo(px+TILE-4,py+12); ctx.fill();
+      } else if(t.object==='tree'){
+        ctx.fillStyle='#795548'; ctx.fillRect(px+16,py+19,5,12);
+        ctx.fillStyle='#2f855a'; ctx.beginPath(); ctx.arc(px+18,py+15,11,0,Math.PI*2); ctx.fill();
+      }
+    }
+
+    // Entrance
+    ctx.fillStyle='#334155'; ctx.fillRect(0,(ROWS-2)*TILE-4,5*TILE,5);
+    ctx.fillStyle='#fff'; ctx.font='bold 12px system-ui'; ctx.fillText('ENTRANCE',8,(ROWS-2)*TILE-9);
+
+    for(const a of state.animals){
+      const px=a.px*TILE, py=a.py*TILE;
+      ctx.fillStyle='#fff'; ctx.beginPath(); ctx.ellipse(px,py,12,8,0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#111827'; ctx.lineWidth=2;
+      for(let i=-7;i<=7;i+=5){ ctx.beginPath(); ctx.moveTo(px+i,py-6); ctx.lineTo(px+i+3,py+6); ctx.stroke(); }
+      ctx.fillStyle='#111827'; ctx.beginPath(); ctx.arc(px+10,py-2,5,0,Math.PI*2); ctx.fill(); ctx.lineWidth=1;
+    }
+
+    for(const v of state.visitors){
+      const px=v.x*TILE, py=v.y*TILE;
+      ctx.fillStyle='#2563eb'; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#f1c27d'; ctx.beginPath(); ctx.arc(px,py-7,4,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  let lastTime=performance.now();
+  function loop(now){
+    const dt=Math.min(.05,(now-lastTime)/1000); lastTime=now;
+    state.tick+=dt; state.incomeTimer+=dt;
+    updateVisitors(dt); updateAnimals(dt);
+    if(state.incomeTimer>5){
+      const ticketIncome=state.visitors.length*0.7;
+      const upkeep=state.animals.length*1.2 + state.tiles.flat().filter(t=>t.object==='shop').length*.5;
+      state.money += ticketIncome-upkeep;
+      state.day++;
+      state.incomeTimer=0;
+      msg(`Daily result: +$${ticketIncome.toFixed(0)} tickets, -$${upkeep.toFixed(0)} upkeep.`);
+      updateUI();
+    }
+    draw(); requestAnimationFrame(loop);
+  }
+
+  function save(){
+    const data={money:state.money,day:state.day,tiles:state.tiles,animals:state.animals};
+    localStorage.setItem('pocketZooSave',JSON.stringify(data)); msg('Game saved in this browser.');
+  }
+  function load(){
+    const raw=localStorage.getItem('pocketZooSave'); if(!raw) return;
+    try{ const d=JSON.parse(raw); state.money=d.money; state.day=d.day; state.tiles=d.tiles; state.animals=d.animals||[]; msg('Saved game loaded.'); }catch(e){}
+  }
+  document.getElementById('saveBtn').addEventListener('click',save);
+  document.getElementById('resetBtn').addEventListener('click',()=>{ if(confirm('Reset the zoo?')){localStorage.removeItem('pocketZooSave'); location.reload();} });
+  window.addEventListener('beforeunload',save);
+
+  load(); updateUI(); requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
