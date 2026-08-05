@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#123f32">
+<title>Pocket Zoo Architect — 2.5D Edition</title>
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/responsive.css">
+
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><ellipse cx="17" cy="27" rx="11" ry="7" fill="#d59a36"/><path d="M24 25 L28 9 Q29 5 33 7 L35 10 L31 14 L29 27" fill="#d59a36"/><circle cx="32" cy="8" r="3" fill="#d59a36"/><path d="M30 5V2M34 6l2-3" stroke="#5e4325" stroke-width="2" stroke-linecap="round"/><path d="M10 31v8M19 32v7" stroke="#5e4325" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="8" r="1" fill="#172f27"/><g fill="#855525"><circle cx="13" cy="25" r="2"/><circle cx="20" cy="29" r="2"/><circle cx="27" cy="17" r="1.7"/></g></svg></div><div><strong>Pocket Zoo Architect</strong><small>Rotatable 2.5D edition</small></div></div>
+  <div class="stat">Cash <b id="moneyStat">$0</b></div>
+  <div class="stat">Date <b id="dateStat">1 Mar 2026</b></div>
+  <div class="stat">Guests <b id="guestStat">0</b></div>
+  <div class="stat">Rating <b id="starStat" class="stars">★☆☆☆☆</b></div>
+  <div id="message">Build your first habitat.</div>
+  <div class="header-actions">
+    <button class="icon-btn finance-btn" id="financeBtn" title="Open monthly finances">Finance</button>
+    <button class="icon-btn land-btn" id="landBtn" title="Buy zoo expansions">Land</button>
+    <button class="icon-btn" data-speed="0" title="Pause">Ⅱ</button><button class="icon-btn active" data-speed="1" title="Normal speed">▶</button><button class="icon-btn" data-speed="3" title="Fast speed">▶▶</button>
+    <button class="icon-btn" id="saveBtn" title="Save to this browser">Save</button><button class="icon-btn" id="helpBtn" title="Show help">Help</button><button class="icon-btn" id="panelBtn" title="Toggle management panel">Menu</button>
+  </div>
+</header>
+<div id="main">
+<aside id="leftPanel">
+  <div class="panel-head"><h2>Construction</h2><p>Select a tool, then click or drag on the map.</p>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-category="build">Build</button>
+      <button class="tab" data-category="terrain">Terrain</button>
+      <button class="tab" data-category="fences">Fences</button>
+      <button class="tab" data-category="habitat">Habitat</button>
+      <button class="tab" data-category="foliage">Foliage</button>
+      <button class="tab" data-category="animals">Animals</button>
+      <button class="tab" data-category="facilities">Shops</button>
+      <button class="tab" data-category="education">Education</button>
+    </div>
+  </div>
+  <div id="toolButtons"></div><div id="selectedTool"></div>
+  <div class="construction-actions" aria-label="Permanent construction tools">
+    <button class="quick-tool" data-quick-tool="inspect" title="Inspect any animal, habitat, building, employee, guest, or land parcel"><span class="quick-art"><svg viewBox="0 0 32 32"><circle cx="13" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="3"/><path d="M19 19l8 8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg></span><span><b>Inspect</b><small>View live details</small></span></button>
+    <button class="quick-tool danger-tool" data-quick-tool="erase" title="Remove paths, terrain, objects, fences, facilities, or animals for a partial refund"><span class="quick-art"><svg viewBox="0 0 32 32"><path d="M5 19h19l3 5H8z" fill="currentColor"/><rect x="8" y="11" width="12" height="9" rx="2" fill="currentColor" opacity=".72"/><path d="M19 11l5-5 3 3-6 6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="11" cy="26" r="3"/><circle cx="23" cy="26" r="3"/></svg></span><span><b>Bulldoze</b><small>Paths included</small></span></button>
+  </div>
+</aside>
+<section id="canvasArea"><div class="canvas-controls" aria-label="Camera controls">
+  <button class="canvas-btn" id="zoomOut" title="Zoom out">−</button>
+  <button class="canvas-btn" id="zoomIn" title="Zoom in">+</button>
+  <button class="canvas-btn rotate-btn" id="rotateLeft" title="Rotate view left (Q)">↺</button>
+  <div class="camera-readout" title="Current camera direction"><span class="compass"><i id="compassNeedle"></i></span><b id="cameraDirection">North-east</b></div>
+  <button class="canvas-btn rotate-btn" id="rotateRight" title="Rotate view right (E)">↻</button>
+  <button class="canvas-btn" id="centerBtn" title="Center the entrance">Entrance</button>
+</div><div id="canvasWrap"><canvas id="game"></canvas></div><div id="hoverTip"></div></section>
+<aside id="rightPanel">
+  <div class="panel-head"><h2>Zoo management</h2><p>Staff, welfare, education and objectives.</p></div>
+  <div class="section"><h3>Zoo condition <span id="ratingLabel">Developing</span></h3><div class="metric-row"><span>Guest satisfaction</span><b id="satisfactionValue">0%</b></div><div class="meter"><i id="satisfactionMeter"></i></div><div class="metric-row"><span>Cleanliness</span><b id="cleanValue">100%</b></div><div class="meter"><i id="cleanMeter"></i></div><div class="metric-row"><span>Education</span><b id="educationValue">0</b></div><div class="meter"><i id="educationMeter"></i></div></div>
+  <div class="section collapsible" data-collapsible="employees"><h3><button class="section-toggle" type="button"><span>Employees <small id="staffSummary">0 keepers · 0 janitors · 0 guides</small></span><span><b id="payrollMini">$0/month</b><i class="chevron">−</i></span></button></h3><div class="section-body"><div class="staff-grid">
+    <div class="staff-card"><div class="staff-card-title"><span class="role-mark keeper-mark">K</span><strong>Keepers</strong><span class="staff-count" id="keeperCount">0</span></div><small>Feed animals and inspect habitats.</small><div class="staff-actions"><button class="hire" data-hire="keeper" title="Hire a keeper">Hire</button><button class="dismiss" data-dismiss="keeper" title="Dismiss the most recently hired keeper">−</button></div></div>
+    <div class="staff-card"><div class="staff-card-title"><span class="role-mark janitor-mark">J</span><strong>Janitors</strong><span class="staff-count" id="janitorCount">0</span></div><small>Remove litter and patrol paths.</small><div class="staff-actions"><button class="hire" data-hire="janitor" title="Hire a janitor">Hire</button><button class="dismiss" data-dismiss="janitor" title="Dismiss the most recently hired janitor">−</button></div></div>
+    <div class="staff-card"><div class="staff-card-title"><span class="role-mark guide-mark">G</span><strong>Guides</strong><span class="staff-count" id="guideCount">0</span></div><small>Lead paid educational tours.</small><div class="staff-actions"><button class="hire" data-hire="guide" title="Hire a tour guide">Hire</button><button class="dismiss" data-dismiss="guide" title="Dismiss the most recently hired guide">−</button></div></div>
+  </div><div id="staffList" class="staff-list"></div></div></div>
+  <div class="section collapsible" data-collapsible="objectives"><h3><button class="section-toggle" type="button"><span>Objectives <small>cash rewards</small></span><span><i class="chevron">−</i></span></button></h3><div class="section-body"><div id="goals"></div></div></div>
+  <div class="section collapsible" data-collapsible="inspection"><h3><button class="section-toggle" type="button"><span>Inspector <small>updates automatically</small></span><span><i class="chevron">−</i></span></button></h3><div class="section-body"><div id="inspector">Select <b>Inspect</b>, then click an animal, habitat, facility, employee or locked land parcel.</div></div></div>
+  <div class="section collapsible" data-collapsible="log"><h3><button class="section-toggle" type="button"><span>Zoo log <small>latest first</small></span><span><i class="chevron">−</i></span></button></h3><div class="section-body"><div id="log"></div></div></div>
+  <div class="section"><div class="metric-row"><button class="secondary" id="exportBtn" title="Download a portable JSON save">Export save</button><button class="secondary" id="importBtn" title="Restore a previously exported JSON save">Import save</button><input id="importFile" type="file" accept="application/json,.json" hidden><button class="danger" id="resetBtn">New zoo</button></div></div>
+</aside>
+</div></div>
+<div id="welcome" class="modal hidden"><div class="modal-card"><div class="modal-head"><div><h1>Welcome to Pocket Zoo Architect</h1><p>This edition preserves the complete zoo simulation, adds a rotatable 2.5D world, and keeps data, systems, interface, rendering and save logic in maintainable modules.</p></div><button class="close-x" id="closeWelcome">×</button></div><div class="feature-grid"><div class="feature"><b>Monthly management</b><br>Income accumulates all month. Salaries, animal care and utilities are charged when the month closes.</div><div class="feature"><b>Real habitat design</b><br>Species evaluate terrain, matching-biome foliage, enrichment and fence security.</div><div class="feature"><b>Aquatic exhibits</b><br>Use shallow water, deep freshwater or saltwater for otters, seals, turtles and dolphins.</div><div class="feature"><b>Rotatable 2.5D world</b><br>Use Q/E or the camera arrows to view habitats from four directions.</div><div class="feature"><b>Expand the zoo</b><br>Buy five surrounding land parcels as your zoo grows.</div></div><p><b>Suggested start:</b> extend the entrance path, build a small low-fence goat habitat with a gate, shelter, feeder, temperate foliage and a log pile. Early objectives and founder support provide additional cash.</p><div class="modal-actions"><button class="primary" id="continueBtn">Continue</button><button class="danger" id="startFresh">Start new zoo</button></div></div></div>
+<div id="financeModal" class="modal hidden"><div class="modal-card wide"><div class="modal-head"><div><h1>Monthly finances</h1><p id="financePeriod">March 2026 · figures accumulate until month end.</p></div><button class="close-x" id="closeFinance">×</button></div>
+  <div class="finance-summary"><div class="finance-kpi"><span>Cash</span><b id="finCash">$0</b></div><div class="finance-kpi"><span>Income so far</span><b id="finIncome" class="positive">$0</b></div><div class="finance-kpi"><span>Paid expenses</span><b id="finExpense" class="negative">$0</b></div><div class="finance-kpi"><span>Cash flow so far</span><b id="finNet">$0</b></div><div class="finance-kpi"><span>Projected month result</span><b id="finForecast">$0</b></div><div class="finance-kpi"><span>Next month-end</span><b id="finNextPayroll">1 Apr</b></div></div>
+  <div class="finance-grid"><div class="chart-card"><h3>Monthly cash flow</h3><div class="legend"><span><i class="dot income"></i>Income</span><span><i class="dot expense"></i>Expenses</span></div><canvas id="financeChart" width="680" height="230"></canvas></div><div class="chart-card"><h3>Current month breakdown</h3><div class="breakdown-columns"><div class="breakdown"><h4 class="positive">Income</h4><div id="incomeBars" class="category-bars"></div></div><div class="breakdown"><h4 class="negative">Expenses</h4><div id="expenseBars" class="category-bars"></div></div></div></div></div>
+  <div class="finance-controls"><div class="control-card"><h3>Admission price</h3><div class="range-row"><input id="ticketSlider" type="range" min="5" max="35" step="1"><b id="ticketValue">$10</b></div><p>Higher prices increase revenue per guest but reduce arrivals and satisfaction.</p></div><div class="control-card"><h3>Forecast recurring costs</h3><div class="metric-row"><span>Employee salaries</span><b id="forecastPayroll">$0</b></div><div class="metric-row"><span>Animal care</span><b id="forecastCare">$0</b></div><div class="metric-row"><span>Utilities & upkeep</span><b id="forecastUtilities">$0</b></div><div class="metric-row"><span>Total due month-end</span><b id="forecastTotal">$0</b></div></div></div>
+  <div class="chart-card" style="margin-top:12px"><h3>Completed months</h3><table class="finance-table"><thead><tr><th>Month</th><th>Income</th><th>Expenses</th><th>Net</th><th>Closing cash</th></tr></thead><tbody id="financeTable"></tbody></table></div>
+</div></div>
+<div id="landModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><div><h1>Zoo land expansion</h1><p>Purchase adjacent parcels permanently. Locked areas are visible beyond the current boundary.</p></div><button class="close-x" id="closeLand">×</button></div><div id="landGrid" class="land-grid"></div></div></div>
+<div id="toast"></div>
+<script src="src/core/config.js" defer></script>
+<script src="src/data/world.js" defer></script>
+<script src="src/data/foliage.js" defer></script>
+<script src="src/data/objects.js" defer></script>
+<script src="src/data/species.js" defer></script>
+<script src="src/data/catalog.js" defer></script>
+<script src="src/core/validation.js" defer></script>
+<script src="src/core/state.js" defer></script>
+<script src="src/core/helpers.js" defer></script>
+<script src="src/systems/navigation.js" defer></script>
+<script src="src/systems/habitats.js" defer></script>
+<script src="src/systems/objectives.js" defer></script>
+<script src="src/render/catalog-art.js" defer></script>
+<script src="src/render/camera.js" defer></script>
+<script src="src/ui/construction.js" defer></script>
+<script src="src/ui/management.js" defer></script>
+<script src="src/systems/building.js" defer></script>
+<script src="src/systems/visitors.js" defer></script>
+<script src="src/systems/staff.js" defer></script>
+<script src="src/systems/animals.js" defer></script>
+<script src="src/systems/metrics.js" defer></script>
+<script src="src/systems/finance.js" defer></script>
+<script src="src/ui/land.js" defer></script>
+<script src="src/ui/finance.js" defer></script>
+<script src="src/ui/inspector.js" defer></script>
+<script src="src/render/canvas.js" defer></script>
+<script src="src/input.js" defer></script>
+<script src="src/core/save.js" defer></script>
+<script src="src/ui/events.js" defer></script>
+<script src="src/main.js" defer></script>
+</body>
+</html>
