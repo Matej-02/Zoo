@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#123f32">
+<title>Pocket Zoo Architect — Living Zoo Edition · Otter Preview</title>
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/responsive.css">
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 42 42"><ellipse cx="17" cy="27" rx="11" ry="7" fill="#d59a36"/><path d="M24 25 L28 9 Q29 5 33 7 L35 10 L31 14 L29 27" fill="#d59a36"/><circle cx="32" cy="8" r="3" fill="#d59a36"/><path d="M30 5V2M34 6l2-3" stroke="#5e4325" stroke-width="2" stroke-linecap="round"/><path d="M10 31v8M19 32v7" stroke="#5e4325" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="8" r="1" fill="#172f27"/><g fill="#855525"><circle cx="13" cy="25" r="2"/><circle cx="20" cy="29" r="2"/><circle cx="27" cy="17" r="1.7"/></g></svg></div><div><strong>Pocket Zoo Architect</strong><small>Living Zoo · rotatable 2.5D</small></div></div>
+  <div class="stat">Cash <b id="moneyStat">$0</b></div>
+  <div class="stat">Date <b id="dateStat">1 Mar 2026</b></div>
+  <div class="stat">Guests <b id="guestStat">0</b></div>
+  <div class="stat">Animals <b id="animalHappyStat">—</b></div>
+  <div class="stat">Rating <b id="starStat" class="stars">★☆☆☆☆</b></div>
+  <div id="message">Build your first habitat.</div>
+  <div class="header-actions">
+    <button class="icon-btn" data-speed="0" aria-label="Pause" title="Pause">Ⅱ</button>
+    <button class="icon-btn active" data-speed="1" aria-label="Normal speed" title="Normal speed">▶</button>
+    <button class="icon-btn" data-speed="3" aria-label="Fast speed" title="Fast speed">▶▶</button>
+    <button class="icon-btn" id="saveBtn" title="Save to this browser">Save</button>
+    <button class="icon-btn" id="helpBtn" title="Show help">Help</button>
+  </div>
+</header>
+<div id="main">
+<nav id="iconRail" aria-label="Zoo tools and management">
+  <button class="rail-btn active" data-panel="overview" aria-label="Zoo overview" title="Zoo overview"><svg viewBox="0 0 32 32"><path d="M5 26V15l11-9 11 9v11" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 26v-8h12v8M8 12h16" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Zoo</span></button>
+  <div class="rail-separator"></div>
+  <button class="rail-btn" data-panel="construction" data-category="build" aria-label="Paths" title="Paths"><svg viewBox="0 0 32 32"><path d="M5 29Q8 19 14 16T22 3" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M5 29Q8 19 14 16T22 3" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="2" stroke-dasharray="4 4"/></svg><span>Paths</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="terrain" aria-label="Terrain" title="Terrain"><svg viewBox="0 0 32 32"><path d="M3 24l8-12 6 7 5-10 7 15z" fill="currentColor" opacity=".25"/><path d="M3 24l8-12 6 7 5-10 7 15" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M3 27h26" stroke="currentColor" stroke-width="2.5"/></svg><span>Terrain</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="fences" aria-label="Fences and gates" title="Fences and gates"><svg viewBox="0 0 32 32"><path d="M5 7v21M15 7v21M27 7v21M3 13h26M3 22h26" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Fences</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="habitat" aria-label="Habitat equipment" title="Habitat equipment"><svg viewBox="0 0 32 32"><path d="M4 25h24M7 25V14l9-7 9 7v11" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="18" r="3" fill="currentColor"/></svg><span>Habitat</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="foliage" aria-label="Foliage" title="Foliage"><svg viewBox="0 0 32 32"><path d="M16 29V12" stroke="currentColor" stroke-width="2.5"/><path d="M16 16C5 17 4 7 5 5c7 0 12 4 11 11ZM16 21c10 1 13-7 12-11-7-1-12 3-12 11Z" fill="currentColor" opacity=".75"/></svg><span>Foliage</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="animals" aria-label="Animals" title="Animals"><svg viewBox="0 0 32 32"><ellipse cx="16" cy="20" rx="9" ry="7" fill="currentColor" opacity=".75"/><circle cx="7" cy="10" r="3" fill="currentColor"/><circle cx="14" cy="7" r="3" fill="currentColor"/><circle cx="22" cy="8" r="3" fill="currentColor"/><circle cx="27" cy="13" r="3" fill="currentColor"/></svg><span>Animals</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="facilities" aria-label="Guest buildings" title="Guest buildings"><svg viewBox="0 0 32 32"><path d="M5 12h22l-2-7H7z" fill="currentColor" opacity=".25"/><path d="M6 12v15h20V12M4 12h24M10 12v15M22 12v15" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Shops</span></button>
+  <button class="rail-btn" data-panel="construction" data-category="education" aria-label="Education and attractions" title="Education and attractions"><svg viewBox="0 0 32 32"><path d="M4 10l12-6 12 6-12 6z" fill="currentColor" opacity=".3"/><path d="M7 13v9c4 4 14 4 18 0v-9M28 10v10" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Learn</span></button>
+  <div class="rail-separator"></div>
+  <button class="rail-btn tool-rail" id="inspectToolBtn" data-tool="inspect" data-panel="inspector" aria-label="Inspect tool" title="Inspect tool"><svg viewBox="0 0 32 32"><circle cx="13" cy="13" r="8" fill="none" stroke="currentColor" stroke-width="3"/><path d="M19 19l8 8" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg><span>Inspect</span></button>
+  <button class="rail-btn tool-rail danger-rail" id="eraseToolBtn" data-tool="erase" aria-label="Bulldoze tool" title="Bulldoze tool"><svg viewBox="0 0 32 32"><path d="M5 19h19l3 5H8z" fill="currentColor"/><rect x="8" y="11" width="12" height="9" rx="2" fill="currentColor" opacity=".65"/><path d="M19 11l5-5 3 3-6 6" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="11" cy="26" r="3"/><circle cx="23" cy="26" r="3"/></svg><span>Bulldoze</span></button>
+  <div class="rail-separator"></div>
+  <button class="rail-btn" data-panel="staff" aria-label="Employees" title="Employees"><svg viewBox="0 0 32 32"><circle cx="11" cy="10" r="5" fill="currentColor" opacity=".75"/><circle cx="23" cy="12" r="4" fill="currentColor" opacity=".45"/><path d="M3 28c0-8 4-12 9-12s9 4 9 12M18 28c0-6 3-9 7-9 3 0 5 2 6 5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Staff</span></button>
+  <button class="rail-btn" data-panel="objectives" aria-label="Objectives" title="Objectives"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="16" cy="16" r="6" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 16l10-10" stroke="currentColor" stroke-width="3"/><path d="M23 5h5v5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg><span>Goals</span></button>
+  <button class="rail-btn" data-panel="finance" aria-label="Finance" title="Finance"><svg viewBox="0 0 32 32"><path d="M5 27h23M8 23V14M14 23V8M20 23V17M26 23V5" fill="none" stroke="currentColor" stroke-width="3"/><path d="M6 10l7-5 6 7 8-8" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Money</span></button>
+  <button class="rail-btn" data-panel="land" aria-label="Land expansion" title="Land expansion"><svg viewBox="0 0 32 32"><path d="M4 7l8-3 8 3 8-3v21l-8 3-8-3-8 3z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M12 4v21M20 7v21" stroke="currentColor" stroke-width="2"/><path d="M22 12h6M25 9v6" stroke="currentColor" stroke-width="2.5"/></svg><span>Land</span></button>
+  <button class="rail-btn" data-panel="events" aria-label="Zoo events" title="Zoo events"><svg viewBox="0 0 32 32"><path d="M5 6h22v17H13l-6 5v-5H5z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M10 12h12M10 17h9" stroke="currentColor" stroke-width="2.5"/></svg><span>News</span><i id="eventBadge" class="rail-badge hidden">0</i></button>
+  <button class="rail-btn" data-panel="settings" aria-label="Save and settings" title="Save and settings"><svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M16 3v5M16 24v5M3 16h5M24 16h5M7 7l4 4M21 21l4 4M25 7l-4 4M11 21l-4 4" stroke="currentColor" stroke-width="2.5"/></svg><span>More</span></button>
+</nav>
+
+<aside id="contextPanel" class="open">
+  <div class="context-head"><div><h2 id="panelTitle">Zoo overview</h2><p id="panelSubtitle">The condition of your living zoo.</p></div><button id="closeContext" class="close-x" aria-label="Close panel">×</button></div>
+  <div id="panelViews">
+    <section class="feature-panel active" data-view="overview">
+      <div class="condition-card"><div class="condition-header"><strong id="ratingLabel">Developing</strong><span id="overviewStars" class="stars">★☆☆☆☆</span></div>
+        <div class="metric-row"><span>Guest satisfaction</span><b id="satisfactionValue">0%</b></div><div class="meter"><i id="satisfactionMeter"></i></div>
+        <div class="metric-row"><span>Cleanliness</span><b id="cleanValue">100%</b></div><div class="meter"><i id="cleanMeter"></i></div>
+        <div class="metric-row"><span>Animal happiness</span><b id="animalHappinessValue">—</b></div><div class="meter animal-meter"><i id="animalHappinessMeter"></i></div>
+        <div class="metric-row"><span>Education</span><b id="educationValue">0</b></div><div class="meter"><i id="educationMeter"></i></div>
+      </div>
+      <div class="overview-grid">
+        <div class="mini-kpi"><span>Animals</span><b id="animalCountOverview">0</b></div>
+        <div class="mini-kpi"><span>Species</span><b id="speciesCountOverview">0</b></div>
+        <div class="mini-kpi"><span>Employees</span><b id="staffCountOverview">0</b></div>
+        <div class="mini-kpi"><span>Monthly forecast</span><b id="forecastOverview">$0</b></div>
+      </div>
+      <div class="panel-note"><b>Living zoo</b><p>Happy, healthy animals improve reputation and guest satisfaction. Keepers now feed, groom, clean habitats and care for sick animals.</p></div>
+    </section>
+
+    <section class="feature-panel" data-view="construction">
+      <div id="toolButtons"></div>
+      <div id="selectedTool"></div>
+    </section>
+
+    <section class="feature-panel" data-view="staff">
+      <div class="staff-summary-box"><span>Monthly payroll</span><b id="payrollMini">$0/month</b><small id="staffSummary">0 keepers · 0 janitors · 0 guides</small></div>
+      <div class="staff-grid">
+        <div class="staff-card"><div class="staff-card-title"><span class="role-mark keeper-mark">K</span><strong>Keepers</strong><span class="staff-count" id="keeperCount">0</span></div><small>Feed, groom, treat animals and clean habitat waste.</small><div class="staff-actions"><button class="hire" data-hire="keeper">Hire</button><button class="dismiss" data-dismiss="keeper">Dismiss</button></div></div>
+        <div class="staff-card"><div class="staff-card-title"><span class="role-mark janitor-mark">J</span><strong>Janitors</strong><span class="staff-count" id="janitorCount">0</span></div><small>Remove guest litter and patrol public paths.</small><div class="staff-actions"><button class="hire" data-hire="janitor">Hire</button><button class="dismiss" data-dismiss="janitor">Dismiss</button></div></div>
+        <div class="staff-card"><div class="staff-card-title"><span class="role-mark guide-mark">G</span><strong>Guides</strong><span class="staff-count" id="guideCount">0</span></div><small>Lead paid tours and raise education.</small><div class="staff-actions"><button class="hire" data-hire="guide">Hire</button><button class="dismiss" data-dismiss="guide">Dismiss</button></div></div>
+      </div>
+      <div id="staffList" class="staff-list"></div>
+    </section>
+
+    <section class="feature-panel" data-view="objectives"><div id="goals"></div></section>
+
+    <section class="feature-panel" data-view="inspector"><div id="inspector">Click an animal, habitat, building, employee, guest or land parcel to see live details.</div></section>
+
+    <section class="feature-panel finance-panel" data-view="finance">
+      <p id="financePeriod" class="panel-intro">March 2026 · figures accumulate until month end.</p>
+      <div class="finance-summary">
+        <div class="finance-kpi"><span>Cash</span><b id="finCash">$0</b></div><div class="finance-kpi"><span>Income</span><b id="finIncome" class="positive">$0</b></div>
+        <div class="finance-kpi"><span>Paid expenses</span><b id="finExpense" class="negative">$0</b></div><div class="finance-kpi"><span>Cash flow</span><b id="finNet">$0</b></div>
+        <div class="finance-kpi wide-kpi"><span>Projected month result</span><b id="finForecast">$0</b></div><div class="finance-kpi wide-kpi"><span>Next month-end</span><b id="finNextPayroll">1 Apr</b></div>
+      </div>
+      <div class="chart-card"><h3>Monthly cash flow</h3><div class="legend"><span><i class="dot income"></i>Income</span><span><i class="dot expense"></i>Expenses</span></div><canvas id="financeChart" width="560" height="220"></canvas></div>
+      <div class="control-card"><h3>Admission price</h3><div class="range-row"><input id="ticketSlider" type="range" min="5" max="35" step="1"><b id="ticketValue">$10</b></div><p>Higher prices increase revenue per guest but reduce arrivals and satisfaction.</p></div>
+      <div class="control-card"><h3>Costs due at month-end</h3><div class="metric-row"><span>Employee salaries</span><b id="forecastPayroll">$0</b></div><div class="metric-row"><span>Animal care</span><b id="forecastCare">$0</b></div><div class="metric-row"><span>Utilities & upkeep</span><b id="forecastUtilities">$0</b></div><div class="metric-row total-row"><span>Total</span><b id="forecastTotal">$0</b></div></div>
+      <div class="chart-card"><h3>Current month income</h3><div id="incomeBars" class="category-bars"></div></div>
+      <div class="chart-card"><h3>Current month expenses</h3><div id="expenseBars" class="category-bars"></div></div>
+      <div class="chart-card"><h3>Completed months</h3><div class="finance-table-wrap"><table class="finance-table"><thead><tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead><tbody id="financeTable"></tbody></table></div></div>
+    </section>
+
+    <section class="feature-panel" data-view="land"><div id="landGrid" class="land-grid"></div></section>
+
+    <section class="feature-panel" data-view="events">
+      <div class="event-filter-row"><button class="event-filter active" data-event-filter="all">All</button><button class="event-filter" data-event-filter="animal">Animals</button><button class="event-filter" data-event-filter="finance">Money</button><button class="event-filter" data-event-filter="guest">Guests</button></div>
+      <div id="eventFeedPanel" class="event-feed-panel"></div>
+      <details class="history-details"><summary>Technical zoo log</summary><div id="log"></div></details>
+    </section>
+
+    <section class="feature-panel" data-view="settings">
+      <div class="settings-group"><h3>Save data</h3><button class="secondary full-btn" id="exportBtn">Export portable save</button><button class="secondary full-btn" id="importBtn">Import save</button><input id="importFile" type="file" accept="application/json,.json" hidden></div>
+      <div class="settings-group"><h3>Zoo reset</h3><p>Starts a completely fresh zoo and removes compatible browser saves.</p><button class="danger full-btn" id="resetBtn">Start new zoo</button></div>
+      <div class="settings-group"><h3>Controls</h3><p><b>Q / E</b> rotate · mouse wheel or buttons zoom · click and drag to paint paths, terrain and fences.</p></div>
+    </section>
+  </div>
+</aside>
+
+<section id="canvasArea">
+  <div class="canvas-controls" aria-label="Camera controls">
+    <button class="canvas-btn" id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+    <button class="canvas-btn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+    <span class="control-divider"></span>
+    <button class="canvas-btn rotate-btn" id="rotateLeft" title="Rotate view left (Q)" aria-label="Rotate camera left">↺</button>
+    <div class="camera-readout" title="Current camera direction"><span class="compass"><i id="compassNeedle"></i></span><b id="cameraDirection">North-east</b></div>
+    <button class="canvas-btn rotate-btn" id="rotateRight" title="Rotate view right (E)" aria-label="Rotate camera right">↻</button>
+    <span class="control-divider"></span>
+    <button class="canvas-btn" id="centerBtn" title="Center the entrance">Entrance</button>
+  </div>
+  <div id="canvasWrap"><canvas id="game"></canvas></div>
+  <aside id="zooPulse" class="pulse-window">
+    <div class="pulse-head"><div><b>Zoo pulse</b><small>Important recent events</small></div><div><button id="openEventPanel" title="Open all zoo news">Open</button><button id="togglePulse" title="Minimize zoo pulse">−</button></div></div>
+    <div id="zooPulseList" class="pulse-list"></div>
+  </aside>
+</section>
+</div></div>
+
+<div id="welcome" class="modal hidden"><div class="modal-card"><div class="modal-head"><div><h1>Welcome to Pocket Zoo Architect</h1><p>The Living Zoo edition combines the rotatable 2.5D builder with animal hygiene, illness, births, keeper care and a quieter event feed.</p></div><button class="close-x" id="closeWelcome">×</button></div><div class="feature-grid"><div class="feature"><b>One panel at a time</b><br>Use the left icon rail. Close the current panel with × for a larger world view.</div><div class="feature"><b>Living animals</b><br>Animals eat, create habitat waste, need grooming, may become ill and can occasionally have young.</div><div class="feature"><b>Active keepers</b><br>Keepers prioritise treatment, grooming, habitat cleaning and feeding.</div><div class="feature"><b>Curated zoo news</b><br>The pulse highlights only a few meaningful events each game day.</div></div><p><b>Suggested start:</b> extend the entrance path, build a low-fence goat habitat with a gate, shelter, feeder, suitable foliage and enrichment, then hire one keeper.</p><div class="modal-actions"><button class="primary" id="continueBtn">Continue</button><button class="danger" id="startFresh">Start new zoo</button></div></div></div>
+<div id="toast"></div>
+<script src="src/core/config.js" defer></script>
+<script src="src/data/world.js" defer></script>
+<script src="src/data/foliage.js" defer></script>
+<script src="src/data/objects.js" defer></script>
+<script src="src/data/species.js" defer></script>
+<script src="src/data/catalog.js" defer></script>
+<script src="src/core/validation.js" defer></script>
+<script src="src/core/state.js" defer></script>
+<script src="src/core/helpers.js" defer></script>
+<script src="src/systems/navigation.js" defer></script>
+<script src="src/systems/habitats.js" defer></script>
+<script src="src/systems/objectives.js" defer></script>
+<script src="src/render/catalog-art.js" defer></script>
+<script src="src/render/camera.js" defer></script>
+<script src="src/render/sprite-assets.js" defer></script>
+<script src="src/ui/panels.js" defer></script>
+<script src="src/ui/construction.js" defer></script>
+<script src="src/ui/management.js" defer></script>
+<script src="src/systems/building.js" defer></script>
+<script src="src/systems/visitors.js" defer></script>
+<script src="src/systems/staff.js" defer></script>
+<script src="src/systems/animals.js" defer></script>
+<script src="src/systems/metrics.js" defer></script>
+<script src="src/systems/finance.js" defer></script>
+<script src="src/ui/land.js" defer></script>
+<script src="src/ui/finance.js" defer></script>
+<script src="src/ui/inspector.js" defer></script>
+<script src="src/render/canvas.js" defer></script>
+<script src="src/input.js" defer></script>
+<script src="src/core/save.js" defer></script>
+<script src="src/ui/events.js" defer></script>
+<script src="src/main.js" defer></script>
+</body>
+</html>
